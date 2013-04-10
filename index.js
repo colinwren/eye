@@ -8,18 +8,35 @@ module.exports = function (argv) {
   // Default glob
   var pattern = ['**/*', '!**/node_modules/**'];
 
-  // If any eye options are specifed, use them and take them out aof argv array
+  // Get rid of node and bin arguments
+   argv = argv.slice(2);
+
+  // If any eye options are specifed, use them and take them out of argv array
+  // Arguments stripped of eye options
+  var commandArguments = [];
   for (var i = 0; i <argv.length; i++) {
-    if (argv[i].indexOf('--*glob=') !== -1) {
-      pattern = argv[i].split('=')[1];
-      argv.splice(i, 1);
-    } else if (argv[i].indexOf('--*verbose') !== -1) {
+    var argument = argv[i];
+
+    if (argument.indexOf('--*glob=') !== -1) {
+      // Get everything after '=' and replace '%' with '!' because Unix
+      // exectutes everything after '!' so we can't use it. And finally split
+      // at comma to get an array of globs
+      pattern = argument.split('=')[1].split('%').join('!').split(',');
+      continue;
+
+    } else if (argument.indexOf('--*verbose') !== -1) {
       verbose = true;
-      argv.splice(i, 1);
+      continue;
     }
+
+    commandArguments.push(argument);
   }
 
-  var commands = processArguments(argv.slice(2), []);
+  var commands = processArguments(commandArguments, []);
+    if (verbose){
+      console.log('pattern is:');
+      console.log(pattern);
+    }
 
   // Watch file selected by glob for changes
   gaze(pattern, function(err) {
@@ -27,12 +44,15 @@ module.exports = function (argv) {
     if (err) throw err;
 
     // Log watched files
-    if (verbose) console.log(this.watched());
+    if (verbose) {
+      console.log('watched files:');
+      console.log(this.watched());
+    }
 
-    this.on('all', function(filepath) {
+    this.on('all', function(event, filepath) {
 
       // Log changed file
-      if (verbose)  console.log(filepath);
+      if (verbose) console.log(filepath + ' was ' + event);
 
       // Add commands to queue
       queue = queue.concat(commands);
@@ -50,7 +70,10 @@ function runCommands (commands) {
   // Run the first command in the queue
   var command = queue[0];
 
-  if (verbose) console.log('running' + JSON.stringify(command));
+  if (verbose) {
+    console.log('running: ' + command.cmd + ' ' + command.options.join(' '));
+    console.log('result:');
+  }
 
   var cmdProcess = spawn(command.cmd, command.options);
 
