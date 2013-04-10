@@ -7,7 +7,7 @@ npm install -g eye
 ```
 ##Getting Started
 
-Eye watches files specified by a glob pattern such as ```**/*.js``` and runs the provided command whenever one of those files changes.
+Eye watches files in the current directory that match a glob pattern such as ```**/*.js``` and runs the specifed command whenever one of those files changes.
 
 After you have install eye, move to a directory with < 50 files ( so you don't create ridiculous amounts of listeners) and run:
 
@@ -15,7 +15,7 @@ After you have install eye, move to a directory with < 50 files ( so you don't c
 eye ls
 ``` 
 
-Eye will watch all files that match the default glob ```'**/*', '!**/node_modules/**'```  and run ``` npm test ``` when any of the matching files change.
+Eye will watch all files that match the default glob ```'**/*', '!**/node_modules/**'```  and run ``` ls ``` when any of the matching files change.
 
 ##Options
 
