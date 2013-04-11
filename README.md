@@ -1,5 +1,5 @@
 #eye
-> Tiny command line tool for running a command whenever file changes.
+> Tiny command line tool for running a command whenever files change.
 
 ###Installation
 ```
@@ -29,16 +29,16 @@ Running:
 ```
 eye git status --short and git add . -v
 ```
-Will watch files that match the default glob and run ```git status --short``` and then ```git add . -v```. Notice I used ```and``` instead of ```&&```, this is because Unix uses ```&&``` and so we have to use ```and```.
+Will watch files that match the default glob and run ```git status --short``` and then ```git add . -v```. Notice that I used ```and``` instead of ```&&```, this is because Unix uses ```&&``` and so we have to use ```and```.
 
 ####Queuing
-If eye is running a command and there are additional file change events, commands will be added to the queue. Once the initial command is finished, eye will individually execute the commands in the queue until it has been emptied.
+If eye is running a command and there are additional file change events, commands will be added to the queue. Once the initial command is finished, eye will execute the commands in the queue one by one until it has been emptied.
 
 ##Options
 
-All of the options are preceded with ```--*``` so they don't conflict with any of the options for commands you run.
+All of the options are preceded with ```--*``` so they don't conflict with any of the options for the commands you run.
 ###Custom Glob
-The ```--*glob=``` option lets you user custom globs to specify the files you want to watch. eye uses [minimatch](https://github.com/isaacs/minimatch) for file globbing.
+The ```--*glob=``` option lets you use custom globs to specify the files you want to watch. eye uses [minimatch](https://github.com/isaacs/minimatch) for file globbing.
 
 This will watch all ```.json``` files in the current directory and any child directories:
 
@@ -56,7 +56,7 @@ eye --*glob=**/*.json,%**/node_modules/** npm test
 Note that I am using the ```%``` character in place of ```!```, this is because [Unix uses it](http://www.ssec.wisc.edu/mcidas/doc/users_guide/2011.1/exclamation.html) and so we have to use ```%``` in the terminal and convert it to ```!```.
 
 ###Verbose
-Use the ```--*verbose``` option to have eye log useful information.
+Use the ```--*verbose``` option to log useful information. This command:
 
 ```eye --*verbose --*glob=index.js,*.json ls -a```
 
@@ -71,7 +71,7 @@ watched files:
      '/Users/colinwren/Projects/eye/package.json' ] }
 ```
 
-And when a file changes and the command runs it will log:
+And when a file changes, the command will run and log:
 ```
 running: ls -a
 result:
@@ -85,4 +85,3 @@ index.js
 node_modules
 package.json
 ```
-
