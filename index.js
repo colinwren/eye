@@ -8,11 +8,11 @@ module.exports = function (argv) {
   // Default glob
   var pattern = ['**/*', '!**/node_modules/**'];
 
-  // Get rid of node and bin arguments
+  // Get rid of 'node' and 'bin' arguments
    argv = argv.slice(2);
 
-  // If any eye options are specifed, use them and take them out of argv array
-  // Arguments stripped of eye options
+  // Add all of the arguments to the commandArguments array unelss they are eye
+  // options
   var commandArguments = [];
   for (var i = 0; i <argv.length; i++) {
     var argument = argv[i];
@@ -33,10 +33,11 @@ module.exports = function (argv) {
   }
 
   var commands = processArguments(commandArguments, []);
-    if (verbose){
-      console.log('pattern is:');
-      console.log(pattern);
-    }
+
+  if (verbose) {
+    console.log('pattern is:');
+    console.log(pattern);
+  }
 
   // Watch file selected by glob for changes
   gaze(pattern, function(err) {

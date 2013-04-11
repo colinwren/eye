@@ -1,7 +1,7 @@
 {
   "name": "eye",
   "description": "CLI tool to run commands when files change",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/colin/eye",
   "author": {
     "name": "Colin Wren",
