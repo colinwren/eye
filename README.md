@@ -7,31 +7,50 @@ npm install -g eye
 ```
 ##Getting Started
 
-Eye watches files in the current directory that match a glob pattern such as ```**/*.js``` and runs the specifed command whenever one of those files changes.
+####Basic usage
 
-After you have install eye, move to a directory with < 50 files ( so you don't create ridiculous amounts of listeners) and run:
+eye watches files in the current directory that match a glob pattern such as ```**/*.js``` and when one of these files change, eye will run the command you passed to it.
+
+After you have install eye, go to a directory with < 50 files (so you don't create ridiculous amounts of listeners) and run:
 
 ```
-eye ls
+eye date
 ``` 
 
-Eye will watch all files that match the default glob ```'**/*', '!**/node_modules/**'```  and run ``` ls ``` when any of the matching files change.
+eye will watch all files that match the default glob ```'**/*', '!**/node_modules/**'```  and when any of those files change, it will run ```date``` and log the output:
+```
+Wed Apr 10 18:36:36 PDT 2013
+```
+
+####Features
+eye supports multiple commands and options for those commands such as ```--short``` and ```-v```
+
+Running:
+```
+eye git status --short and git add . -v
+```
+Will watch files that match the default glob and run ```git status --short``` and then ```git add . -v```. Notice I used ```and``` instead of ```&&```, this is because Unix uses ```&&``` and so we have to use ```and```.
+
+####Queuing
+If eye is running a command and there are additional file change events, commands will be added to the queue. Once the initial command is finished, eye will individually execute the commands in the queue until it has been emptied.
 
 ##Options
 
-All of the options are preceded with ```--*``` so they don't conflict with any command options you might be running.
+All of the options are preceded with ```--*``` so they don't conflict with any of the options for commands you run.
 ###Custom Glob
-Use the ```--*glob=``` option to use custom globs to specify the files you want to watch. The globs are matched using [minimatch](https://github.com/isaacs/minimatch).
+The ```--*glob=``` option lets you user custom globs to specify the files you want to watch. eye uses [minimatch](https://github.com/isaacs/minimatch) for file globbing.
 
 This will watch all ```.json``` files in the current directory and any child directories:
 
 ```
-eye ls --*glob=**/*.json
+eye --*glob=**/*.json ls
 ``` 
 
 Here is an example with two globs, it matches all ```.json``` files that are not in the ```node_modules``` directory:
 
-```eye ls --*glob=**/*.json,%**/node_modules/**```
+```
+eye --*glob=**/*.json,%**/node_modules/** npm test
+```
 
  
 Note that I am using the ```%``` character in place of ```!```, this is because [Unix uses it](http://www.ssec.wisc.edu/mcidas/doc/users_guide/2011.1/exclamation.html) and so we have to use ```%``` in the terminal and convert it to ```!```.
@@ -46,8 +65,6 @@ Will log:
 ```
 pattern is:
 [ 'index.js', '*.json' ]
-```
-```
 watched files:
 { '/Users/colinwren/Projects/eye/':
    [ '/Users/colinwren/Projects/eye/index.js',
