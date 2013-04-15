@@ -1,7 +1,14 @@
 var spawn = require('child_process').spawn;
 var gaze = require('gaze');
+
+// The process where the commands are being run
+var cmdProcess;
+// The queue of commands being run
 var queue = [];
+
+// Default options
 var verbose = false;
+var interrupt = true;
 
 module.exports = function (argv) {
 
@@ -27,6 +34,10 @@ module.exports = function (argv) {
     } else if (argument.indexOf('--*verbose') !== -1) {
       verbose = true;
       continue;
+
+    } else if (argument.indexOf('--*queue') !== -1) {
+      interrupt = false;
+      continue;
     }
 
     commandArguments.push(argument);
@@ -43,6 +54,9 @@ module.exports = function (argv) {
   gaze(pattern, function(err) {
 
     if (err) throw err;
+
+    // Log startup message
+    console.log('eye is watching...');
 
     // Log watched files
     if (verbose) {
@@ -61,6 +75,11 @@ module.exports = function (argv) {
       // if queue isn't being run, run it
       if (queue.length === commands.length) {
         runCommands(commands);
+
+      } else if (interrupt) {
+        // Resart command process
+        cmdProcess.kill();
+        runCommands(commands);
       }
     });
   });
@@ -76,14 +95,14 @@ function runCommands (commands) {
     console.log('result:');
   }
 
-  var cmdProcess = spawn(command.cmd, command.options);
+  cmdProcess = spawn(command.cmd, command.options);
 
   cmdProcess.stdout.on('data', function (data) {
-    console.log('' + data);
+    process.stdout.write('' + data);
   });
 
   cmdProcess.stderr.on('data', function (data) {
-    console.log('' + data);
+    process.stdout.write('' + data);
   });
 
   cmdProcess.on('close', function () {
