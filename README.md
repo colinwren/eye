@@ -1,4 +1,4 @@
-#eye
+#eye [![Build Status](https://travis-ci.org/colinwren/eye.png?branch=master)](https://travis-ci.org/colinwren/eye)
 > Tiny command line tool for running a command whenever files change.
 
 ###Installation
@@ -15,7 +15,7 @@ After you have install eye, go to a directory with < 50 files (so you don't crea
 
 ```
 eye date
-``` 
+```
 
 eye will watch all files that match the default glob ```'**/*', '!**/node_modules/**'```  and when any of those files change, it will run ```date``` and log the output:
 ```
@@ -44,7 +44,7 @@ This will watch all ```.json``` files in the current directory and any child dir
 
 ```
 eye --*glob=**/*.json ls
-``` 
+```
 
 Here is an example with two globs, it matches all ```.json``` files that are not in the ```node_modules``` directory:
 
@@ -52,7 +52,7 @@ Here is an example with two globs, it matches all ```.json``` files that are not
 eye --*glob=**/*.json,%**/node_modules/** npm test
 ```
 
- 
+
 Note that I am using the ```%``` character in place of ```!```, this is because [Unix uses it](http://www.ssec.wisc.edu/mcidas/doc/users_guide/2011.1/exclamation.html) and so we have to use ```%``` in the terminal and convert it to ```!```.
 
 ###Verbose
