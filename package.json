@@ -2,7 +2,7 @@
   "name": "eye",
   "description": "CLI tool to run commands when files change",
   "version": "0.0.2",
-  "homepage": "https://github.com/colin/eye",
+  "homepage": "https://github.com/colinwren/eye",
   "author": {
     "name": "Colin Wren",
     "email": "colin@cawren.com"
@@ -15,7 +15,7 @@
     "url": "https://github.com/colinwren/eye/issues"
   },
   "scripts": {
-    "test": "grunt"
+    "test": "./node_modules/mocha/bin/mocha --ui bdd --reporter nyan  --recursive -b -R nyan -t 3000 $(find ./test -name *.test.*)"
   },
   "licenses": [
     {
@@ -33,6 +33,10 @@
     "watch"
   ],
   "dependencies": {
-    "gaze": "~0.3.3"
+    "gaze": "~0.3.4"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
   }
 }
