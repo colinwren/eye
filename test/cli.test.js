@@ -45,11 +45,7 @@ describe('single task no options', function() {
 
     it('should run the command and log its output', function(done) {
 
-      eyeProcess.stdout.on('data', function (data) {
-
-        var dataString = data + '';
-        dataString.should.equal('task');
-
+      helper.testStream(eyeProcess, ['task'], function() {
         done();
       });
 
@@ -61,11 +57,7 @@ describe('single task no options', function() {
 
     it('should run the command and log its output', function(done) {
 
-      eyeProcess.stdout.on('data', function (data) {
-
-        var dataString = data + '';
-        dataString.should.equal('task');
-
+      helper.testStream(eyeProcess, ['task'], function() {
         done();
       });
 
@@ -77,11 +69,7 @@ describe('single task no options', function() {
 
     it('should run the command and log its output', function(done) {
 
-      eyeProcess.stdout.on('data', function (data) {
-
-        var dataString = data + '';
-        dataString.should.equal('task');
-
+      helper.testStream(eyeProcess, ['task'], function() {
         done();
       });
 
@@ -102,21 +90,9 @@ describe('multiple tasks using `and`', function() {
   describe('when a new file is added to the current directory', function() {
 
     it('should run both commands and log their output', function(done) {
-      var dataCount = 0;
 
-      eyeProcess.stdout.on('data', function (data) {
-
-        var dataString = data + '';
-
-        if (dataCount === 0) {
-          dataString.should.equal('task');
-          dataCount++;
-
-        } else if (dataCount === 1) {
-          dataString.should.equal('task2');
-          fs.unlinkSync('temp');
-          done();
-        }
+      helper.testStream(eyeProcess, ['task','task2'], function() {
+        done();
       });
 
       fs.writeFileSync('temp', 0);
@@ -136,21 +112,9 @@ describe('single task with options arguments', function() {
   describe('when a new file is added to the current directory', function() {
 
     it('should run both commands and log their output', function(done) {
-      var dataCount = 0;
 
-      eyeProcess.stdout.on('data', function (data) {
-
-        var dataString = data + '';
-
-        if (dataCount === 0) {
-          dataString.should.equal('task');
-          dataCount++;
-
-        } else if (dataCount === 1) {
-          dataString.should.equal('option');
-          fs.unlinkSync('temp');
-          done();
-        }
+      helper.testStream(eyeProcess, ['task','option'], function() {
+        done();
       });
 
       fs.writeFileSync('temp', 0);
@@ -175,9 +139,9 @@ describe('specifying custom glob patterns', function() {
 
       it('shouldn\'t run the command', function(done) {
 
-      fs.writeFileSync('./temp.bar', 'new');
+        fs.writeFileSync('./temp.bar', 'new');
 
-        eyeProcess.stdout.on('data', function() {
+        helper.testStream(eyeProcess, [''], function() {
           done(new Error('shouldn\'t have fired'));
         });
 
@@ -195,11 +159,7 @@ describe('specifying custom glob patterns', function() {
 
       it('should run the command', function(done) {
 
-        eyeProcess.stdout.on('data', function (data) {
-          var dataString = data + '';
-          dataString.should.equal('task');
-          fs.unlinkSync('temp.foo');
-
+        helper.testStream(eyeProcess, ['task'], function() {
           done();
         });
 
@@ -223,11 +183,7 @@ describe('specifying custom glob patterns', function() {
 
       it('should run the command', function(done) {
 
-        eyeProcess.stdout.on('data', function (data) {
-          var dataString = data + '';
-          dataString.should.equal('task');
-          fs.unlinkSync('temp.foo');
-
+        helper.testStream(eyeProcess, ['task'], function() {
           done();
         });
 
@@ -239,11 +195,7 @@ describe('specifying custom glob patterns', function() {
 
       it('should run the command', function(done) {
 
-        eyeProcess.stdout.on('data', function (data) {
-          var dataString = data + '';
-          dataString.should.equal('task');
-          fs.unlinkSync('temp.cat');
-
+        helper.testStream(eyeProcess, ['task'], function() {
           done();
         });
 
@@ -267,7 +219,7 @@ describe('specifying custom glob patterns', function() {
 
       it('shouldn\'t run the command', function(done) {
 
-        eyeProcess.stdout.on('data', function() {
+        helper.testStream(eyeProcess, [''], function() {
           done(new Error('shouldn\'t have fired'));
         });
 
@@ -285,11 +237,7 @@ describe('specifying custom glob patterns', function() {
 
       it('should run the command', function(done) {
 
-        eyeProcess.stdout.on('data', function (data) {
-          var dataString = data + '';
-          dataString.should.equal('task');
-          fs.unlinkSync('temp.bar');
-
+        helper.testStream(eyeProcess, ['task'], function() {
           done();
         });
 
