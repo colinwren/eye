@@ -3,20 +3,36 @@ var gaze = require('gaze');
 
 // The process where the commands are being run
 var cmdProcess;
-// The queue of commands being run
 var queue = [];
+var running = false;
 
 // Default options
-var verbose = false;
-var interrupt = true;
+var options = {
+  verbose: false,
+  interrupt: true,
+  useQueue: false,
+  pattern: ['**/*', '!**/node_modules/**']
+};
 
 module.exports = function (argv) {
 
-  // Default glob
-  var pattern = ['**/*', '!**/node_modules/**'];
-
   // Get rid of 'node' and 'bin' arguments
    argv = argv.slice(2);
+
+   if (argv.length === 0) {
+    console.log('Usage: eye <command>');
+    console.log('');
+    console.log('Options:');
+    console.log('');
+    console.log('  --*glob=<pattern> Specify which files you want to watch');
+    console.log('');
+    console.log('  --*queue          Have commands form a queue and be run one at a time until the queue is empty');
+    console.log('');
+    console.log('  --*continue       If a file event is triggered while a command is being run, don\'t interrupt it');
+    console.log('');
+    console.log('  --*verbose        Log files watched, text of the comand being run and more');
+    process.exit(1);
+   }
 
   // Add all of the arguments to the commandArguments array unelss they are eye
   // options
@@ -28,30 +44,31 @@ module.exports = function (argv) {
       // Get everything after '=' and replace '%' with '!' because Unix
       // exectutes everything after '!' so we can't use it. And finally split
       // at comma to get an array of globs
-      pattern = argument.split('=')[1].split('%').join('!').split(',');
-      continue;
+      options.pattern = argument.split('=')[1].split('%').join('!').split(',');
 
     } else if (argument.indexOf('--*verbose') !== -1) {
-      verbose = true;
-      continue;
+      options.verbose = true;
 
     } else if (argument.indexOf('--*queue') !== -1) {
-      interrupt = false;
-      continue;
-    }
+      options.useQueue = true;
 
-    commandArguments.push(argument);
+    } else if (argument.indexOf('--*continue') !== -1) {
+      options.interrupt = false;
+
+    } else {
+      commandArguments.push(argument);
+    }
   }
 
   var commands = processArguments(commandArguments, []);
 
-  if (verbose) {
+  if (options.verbose) {
     console.log('pattern is:');
-    console.log(pattern);
+    console.log(options.pattern);
   }
 
   // Watch file selected by glob for changes
-  gaze(pattern, function(err) {
+  gaze(options.pattern, function(err) {
 
     if (err) throw err;
 
@@ -59,38 +76,50 @@ module.exports = function (argv) {
     console.log('eye is watching...');
 
     // Log watched files
-    if (verbose) {
+    if (options.verbose) {
       console.log('watched files:');
       console.log(this.watched());
     }
 
+    this.on('error', function(err) {
+      throw err;
+    });
+
     this.on('all', function(event, filepath) {
 
-      // Log changed file
-      if (verbose) console.log(filepath + ' was ' + event);
+      // Log file event
+      if (options.verbose) console.log(filepath + ' was ' + event);
 
-      // Add commands to queue
-      queue = queue.concat(commands);
+      if (options.useQueue) {
+        // Add commands to queue
+        queue = queue.concat(commands);
+      } else if (! queue.length) {
+        queue = [].concat(commands);
+      }
 
-      // if queue isn't being run, run it
-      if (queue.length === commands.length) {
+      // If queue isn't being run, run it
+      if (! running) {
+
         runCommands(commands);
+      // If commands are in the process of running
+      } else if (options.interrupt && cmdProcess) {
+        // The closing of the command process will remove the first queue item
+        // so we add and empty queue item so it won't remove the next command
+        if (! options.queue) queue.unshift('');
 
-      } else if (interrupt) {
-        // Resart command process
         cmdProcess.kill();
-        runCommands(commands);
       }
     });
   });
 };
 
 function runCommands (commands) {
+  running = true;
 
   // Run the first command in the queue
   var command = queue[0];
 
-  if (verbose) {
+  if (options.verbose) {
     console.log('running: ' + command.cmd + ' ' + command.options.join(' '));
     console.log('result:');
   }
@@ -110,6 +139,7 @@ function runCommands (commands) {
     queue.shift();
     // If there are more commands in the queue, recurse
     if (queue.length > 0) runCommands(commands);
+    running = false;
   });
 }
 
