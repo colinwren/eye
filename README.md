@@ -31,9 +31,6 @@ eye git status --short and git add . -v
 ```
 Will watch files that match the default glob and run ```git status --short``` and then ```git add . -v```. Notice that I used ```and``` instead of ```&&```, this is because Unix uses ```&&``` and so we have to use ```and```.
 
-####Queuing
-If eye is running a command and there are additional file change events, commands will be added to the queue. Once the initial command is finished, eye will execute the commands in the queue one by one until it has been emptied.
-
 ##Options
 
 All of the options are preceded with ```--*``` so they don't conflict with any of the options for the commands you run.
@@ -54,6 +51,16 @@ eye --*glob=**/*.json,%**/node_modules/** npm test
 
 
 Note that I am using the ```%``` character in place of ```!```, this is because [Unix uses it](http://www.ssec.wisc.edu/mcidas/doc/users_guide/2011.1/exclamation.html) and so we have to use ```%``` in the terminal and convert it to ```!```.
+
+####Continue
+Use the ```--*continue``` option to run commands without interuption.
+
+By default, if eye is running a command and a file event occurs, eye will interrupt it and rerun the command. With this option, if a file event is triggered while a command is being run, the running command process won't be interrupted.
+
+####Queuing
+Use the ```--*queue``` option to have commands form a queue and be run one at a time until the queue is empty.
+
+With this option, if eye is running a command and there are additional file change events, commands will be added to the queue. Once the initial command is finished, eye will execute the commands in the queue one by one until it has been emptied.
 
 ###Verbose
 Use the ```--*verbose``` option to log useful information. This command:
