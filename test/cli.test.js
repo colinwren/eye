@@ -148,7 +148,6 @@ describe('specifying custom glob patterns', function() {
         // Change unmatched file and wait to ensure task isn't run
         fs.writeFile('temp.bar', 'changed', function() {
           setTimeout(function() {
-            fs.unlinkSync('temp.bar');
             done();
           }, 1000);
         });
@@ -226,14 +225,13 @@ describe('specifying custom glob patterns', function() {
         // Change excluded file and wait to ensure task isn't run
         fs.writeFile('temp.foo', 'changed', function() {
           setTimeout(function() {
-            fs.unlinkSync('temp.foo');
             done();
           }, 1000);
         });
       });
     });
 
-    describe('when a file that doesn\'t match the  exclusion glob is modified', function() {
+    describe('when a file that doesn\'t match the exclusion glob is modified', function() {
 
       it('should run the command', function(done) {
 
@@ -243,6 +241,111 @@ describe('specifying custom glob patterns', function() {
 
         fs.writeFileSync('temp.bar', 'changed');
       });
+    });
+  });
+});
+
+describe('task process without queueing', function() {
+  beforeEach(function (done) {
+    fs.writeFileSync('temp', 'new');
+    helper.spawnEye(['node', 'longTask.js'], function(eyeProc) {
+      eyeProcess = eyeProc;
+      done();
+    });
+  });
+
+  describe('when a new file is added while task process is already running', function() {
+
+    it('should stop the process and rerun the command', function(done) {
+
+      helper.testStream(eyeProcess, ['longTask', 'longTask'], function() {
+        done(new Error('shouldn\'t have fired'));
+      });
+
+      fs.writeFileSync('temp', 'changed');
+
+      // Change excluded file and wait to ensure task isn't run twice
+      fs.writeFile('temp2', 'new', function() {
+        setTimeout(function() {
+          done();
+        }, 2700);
+      });
+    });
+  });
+});
+
+describe('task process with queueing', function() {
+  beforeEach(function (done) {
+    fs.writeFileSync('temp', 'new');
+    helper.spawnEye(['node', 'longTask.js', '--*queue', '--*continue'], function(eyeProc) {
+      eyeProcess = eyeProc;
+      done();
+    });
+  });
+
+  describe('when a new file is added while task process is already running', function() {
+
+    it('should finish running the command and then run it again', function(done) {
+
+      helper.testStream(eyeProcess, ['longTask', 'longTask'], function() {
+        done();
+      });
+
+      fs.writeFileSync('temp', 'changed');
+      fs.writeFileSync('temp2', 'new');
+    });
+  });
+});
+
+describe('task process interuption and restarting', function() {
+  beforeEach(function (done) {
+    fs.writeFileSync('temp', 'new');
+    helper.spawnEye(['node', 'longTask.js'], function(eyeProc) {
+      eyeProcess = eyeProc;
+      done();
+    });
+  });
+
+  describe('when a new file is added while task process is already running', function() {
+
+    it('should stop the process and rerun the command', function(done) {
+
+      helper.testStream(eyeProcess, ['longTask', 'longTask'], function() {
+        done(new Error('shouldn\'t have fired'));
+      });
+
+      fs.writeFileSync('temp', 'changed');
+
+      // Change excluded file and wait to ensure task isn't run twice
+      fs.writeFile('temp2', 'new', function() {
+        setTimeout(function() {
+          done();
+        }, 2700);
+      });
+    });
+  });
+});
+
+describe('uninterrupted task running with `--*continue`', function() {
+
+  beforeEach(function (done) {
+    fs.writeFileSync('temp', 'new');
+    helper.spawnEye(['node', 'longTask.js', '--*queue', '--*continue'], function(eyeProc) {
+      eyeProcess = eyeProc;
+      done();
+    });
+  });
+
+  describe('when a new file is added while task process is already running', function() {
+
+    it('should finish running the command and then run it again', function(done) {
+
+      helper.testStream(eyeProcess, ['longTask', 'longTask'], function() {
+        done();
+      });
+
+      fs.writeFileSync('temp', 'changed');
+      fs.writeFileSync('temp2', 'changed');
     });
   });
 });

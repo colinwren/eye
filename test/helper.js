@@ -41,7 +41,7 @@ module.exports = {
           expectedLeft--;
         }
       }
-      if (expectedLeft === 0) {
+      if (expectedLeft <= 0) {
         callback();
       }
     });
